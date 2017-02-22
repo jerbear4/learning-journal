@@ -1,3 +1,4 @@
+from passlib.context import CryptContext
 import datetime
 from sqlalchemy import (
     Column,
@@ -22,6 +23,7 @@ from sqlalchemy.orm import (
 from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
+password_context = CryptContext(schemes=['pbkdf2_sha512'])
 
 # The entry class will hold the entries of our Learning Journal
 class Entry(Base):
@@ -59,3 +61,6 @@ class User(Base):
     @classmethod
     def by_name(cls, name):
         return DBSession.query(cls).filter(cls.name == name).first()
+
+    def verify_password(self, password):
+        return password_context.verify(password, self.password)
