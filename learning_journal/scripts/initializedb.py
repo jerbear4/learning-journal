@@ -42,11 +42,19 @@ def main(argv=sys.argv):
     settings = get_appsettings(config_uri, options=options)
 
     # engine = get_engine(settings)
+    settings = get_appsettings(config_uri, options=options)
+    if 'DATABASE_URL' in os.environ:
+        settings['sqlalchemy.url'] = os.environ['DATABASE_URL']
     engine = engine_from_config(settings, 'sqlalchemy.')
     Base.metadata.create_all(engine)
 
     # session_factory = get_session_factory(engine)
     DBSession.configure(bind=engine)
+    # with transaction.manager:
+    #     password = os.environ.get('ADMIN_PASSWORD', 'admin')
+    #     encrypted = password_context.encrypt(password)
+    #     admin = User(name=u'admin', password=encrypted)
+    #     DBSession.add(admin)
     with transaction.manager:
         password = os.environ.get('ADMIN_PASSWORD', 'admin')
         encrypted = password_context.encrypt(password)
